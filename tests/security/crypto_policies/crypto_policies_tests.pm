@@ -92,7 +92,8 @@ sub ensure_gnutls_is_working {
         "echo 'cn = GnuTLS test CA' > $ca_template_file",
         "echo 'ca' >> $ca_template_file",
         "echo 'cert_signing_key' >> $ca_template_file",
-        "certtool --generate-self-signed --load-privkey $ca_key_file --template $ca_template_file --outfile $ca_cert_file",
+        "certtool --generate-self-signed --load-privkey $ca_key_file \\
+        --template $ca_template_file --outfile $ca_cert_file",
         "certtool --generate-privkey > $srv_key_file",
         "echo 'organization = GnuTLS test server' > $srv_template_file",
         "echo 'cn = localhost' >> $srv_template_file",
