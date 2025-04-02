@@ -1,4 +1,4 @@
-# Copyright 2019 SUSE LLC
+# Copyright 2025 SUSE LLC
 # SPDX-License-Identifier: GPL-2.0-or-later
 #
 # Summary: Test ssh with krb5 authentication - client
@@ -13,12 +13,23 @@ use utils;
 use lockapi;
 use mmapi;
 use krb5crypt;    # Import public variables
+use version_utils 'is_sle';
 
 sub run {
     select_console 'root-console';
 
-    foreach my $i ('GSSAPIAuthentication', 'GSSAPIDelegateCredentials') {
-        assert_script_run "sed -i 's/^.*$i .*\$/$i yes/' /etc/ssh/ssh_config";
+    if (is_sle('>=16')) {
+        # create a new config snippet
+        assert_script_run("cat > /etc/ssh/ssh_config.d/gssapi.conf << EOF
+GSSAPIAuthentication yes
+GSSAPIDelegateCredentials yes
+EOF
+(exit \$?)");
+    } else {
+        # modify existing config file
+        foreach my $i ('GSSAPIAuthentication', 'GSSAPIDelegateCredentials') {
+            assert_script_run "sed -i 's/^#$i.*\$/$i yes/' /etc/ssh/ssh_config";
+        }
     }
 
     mutex_wait('CONFIG_READY_SSH_SERVER');
