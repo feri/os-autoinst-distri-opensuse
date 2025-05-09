@@ -40,6 +40,7 @@ sub run {
     assert_script_run("cd ~/repos;git clone --bare qa1 qa0");
 
     # Clone repo via ssh
+    script_run("ssh-keyscan -H localhost >> ~/.ssh/known_hosts");
     script_run("git clone ssh://localhost:/root/repos/qa0 qa2 | tee /dev/$serialdev", 0);
 
     # Push update via ssh
