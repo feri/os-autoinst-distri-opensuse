@@ -21,10 +21,21 @@ sub run {
     # Make sure audit service is started
     assert_script_run('systemctl is-active auditd');
 
-    # Generate audit records for testing
+    # Wipe out all existing audit rules
+    assert_script_run("auditctl -D");
+
+    # Add a watch rule for /etc/hostname
+    assert_script_run("auditctl -w /etc/hostname");
+
+    # Clean audit logs
     assert_script_run("echo '' > $audit_log");
-    assert_script_run('systemctl stop apparmor');
-    assert_script_run('systemctl start apparmor');
+
+    # Generate audit records for testing
+    if (is_sle('<16')) {
+        assert_script_run('systemctl restart apparmor');
+    }
+    # Read /etc/hostname to see if an event is logged
+    assert_script_run("cat /etc/hostname");
 
     # Search for an event based on the given filename
     assert_script_run("ausearch -f /etc > $tmp_output");
