@@ -4,8 +4,8 @@ description:    >
 schedule:
     - installation/bootloader_start
     - security/boot_disk
+    - security/cc/cc_audit_test_setup
     - '{{setup_multimachine}}'
-    - '{{cc_audit_test_setup}}'
     - security/selinux/selinux_setup
     - security/cc/cc_selinux_setup
     - '{{disable_root_ssh}}'
