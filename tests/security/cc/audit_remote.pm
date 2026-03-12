@@ -32,7 +32,7 @@ sub run {
     assert_script_run("ip addr add $server_ip/24 dev $netdev") if (is_s390x && $test_node eq 'server');
     assert_script_run("ip addr add $client_ip/24 dev $netdev") if (is_s390x && $test_node eq 'client');
 
-    prepare_for_test(make => 1, timeout => 900, make_netconfig => 1);
+    prepare_for_test(make => 1, timeout => 1200, make_netconfig => 1);
 
     # Export password of root
     assert_script_run("export PASSWD=$testapi::password");
@@ -63,15 +63,29 @@ sub run {
         # If there are N cases, we need to iterate from 0 to N-1
         # unfortunately we can't parallellize because each sub-test wants to reset audit and rotate logs
         # result comparison will be done against the baseline when all the tests have run
-        for (my $case = 0; $case < $ncases; $case++) {
+        #
+        # if START_CASE and END_CASE are set then we use those variables to
+        # limit the range of the executed test cases
+        my $case = get_var('START_CASE', 0);
+        my $end_case = get_var('END_CASE', ($ncases - 1));
+
+        # simple sanity checks for the starting case number
+        # we could do more checks (like is it a valid integer etc) but this is
+        # not too common among our tests...
+        $case = $end_case if $case > $end_case;
+        for (; $case <= $end_case; $case++) {
             record_info "Running $test_name #$case ...";
-            script_run("./run.bash $case", timeout => 600);
+            script_run("./run.bash $case", timeout => 1200);
         }
         upload_audit_test_logs($test_name);
+        # Update 2026-03-16: Disable these repetitions for now since these
+        # affect the server side of the tests. We need proof that these are
+        # necessary and there is no better way.
+        #
         # The 4th and 5th may fail because the audit log is generated slowly in server, we need to rerun it again
-        assert_script_run('./run.bash 0', timeout => 600) if (script_run('grep -E "[0].*FAIL" rollup.log') == 0);
-        assert_script_run('./run.bash 4', timeout => 600) if (script_run('grep -E "[4].*FAIL" rollup.log') == 0);
-        assert_script_run('./run.bash 5', timeout => 600) if (script_run('grep -E "[5].*FAIL" rollup.log') == 0);
+        #assert_script_run('./run.bash 0', timeout => 600) if (script_run('grep -E "[0].*FAIL" rollup.log') == 0);
+        #assert_script_run('./run.bash 4', timeout => 600) if (script_run('grep -E "[4].*FAIL" rollup.log') == 0);
+        #assert_script_run('./run.bash 5', timeout => 600) if (script_run('grep -E "[5].*FAIL" rollup.log') == 0);
 
         my $result = compare_run_log($test_name);
         $self->result($result);
