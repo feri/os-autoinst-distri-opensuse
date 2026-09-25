@@ -1,0 +1,52 @@
+name: ncurses_create_hdd_common_criteria
+description: >
+  Installation using ncurses installer with Common Criteria role and full disk
+  encryption on SLE 16 via ncurses-based installer (not Agama).
+vars:
+  YAML_SCHEDULE_DEFAULT: schedule/yast/sle/flows/default_x86_64.yaml
+schedule:
+  bootloader:
+    - installation/bootloader_start
+    - installation/setup_libyui
+  access_beta:
+    - security/installation/handle_beta_status
+  product_selection:
+    - installation/product_selection/install_SLES
+  licensing:
+    - installation/licensing/accept_license
+  registration:
+    - security/installation/registration
+  extension_module_selection:
+    - security/installation/module_selection
+  add_on_product:
+    - security/installation/add_on_selection
+  system_role:
+    - installation/system_role/select_common_criteria_role
+    - installation/common_criteria_configuration/common_criteria_configuration
+  partitioning:
+    - installation/partitioning/accept_proposed_layout
+  timezone:
+    - installation/clock_and_timezone/accept_timezone_configuration
+  authentication:
+    - installation/authentication/use_same_password_for_root
+    - installation/authentication/default_user_simple_pwd
+  bootloader_settings:
+    - installation/bootloader_settings/disable_boot_menu_timeout
+  installation:
+    - installation/launch_installation
+    - installation/confirm_installation
+    - installation/performing_installation/perform_installation
+    - installation/logs_from_installation_system
+    - installation/performing_installation/confirm_reboot
+  grub:
+    - installation/grub_test
+  first_login:
+    - security/boot_disk
+  system_preparation:
+    - console/hostname
+    - console/system_prepare
+    - console/force_scheduled_tasks
+    - security/cc/ensure_crypto_checks_enabled
+    - shutdown/grub_set_bootargs
+    - shutdown/cleanup_before_shutdown
+    - shutdown/shutdown
