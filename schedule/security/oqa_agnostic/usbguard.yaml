@@ -1,0 +1,11 @@
+name: usbguard_oqa_agnostic
+description: >
+    Portable usbguard test for poo#210159. Boots an installed SLE Micro 6.2 image,
+    sets it up and runs the oqa-agnostic usbguard suite. Mirrors the boot/host-config
+    flow of schedule/security/vendor_affirmation_validation.yaml.
+schedule:
+    - installation/bootloader_start
+    - security/boot_disk
+    - transactional/host_config
+    - console/suseconnect_scc
+    - security/oqa_agnostic/usbguard

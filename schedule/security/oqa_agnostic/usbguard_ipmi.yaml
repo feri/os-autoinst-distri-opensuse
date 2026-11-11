@@ -1,0 +1,10 @@
+name: usbguard_oqa_agnostic_baremetal
+description: >
+    Portable usbguard test for poo#210159 on SLE Micro 6.2 bare metal (IPMI). Mirrors the boot/image flow of
+    schedule/security/sle-micro/ipmi/vendor_affirmation_validation.yaml, then runs the oqa-agnostic usbguard suite.
+schedule:
+    - installation/ipxe_install
+    - microos/install_image
+    - transactional/host_config
+    - console/suseconnect_scc
+    - security/oqa_agnostic/usbguard

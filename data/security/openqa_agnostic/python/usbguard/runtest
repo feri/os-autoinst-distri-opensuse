@@ -1,0 +1,42 @@
+#!/bin/bash
+# METADATA_START
+# ---
+# test: usbguard USB access control
+# desc: Portable verification that the usbguard daemon and its device-access
+#       policy engine work on any SUT (SLE 15/16, Tumbleweed, Leap). Checks the
+#       service is active, default insertion policy, block/allow device flip with
+#       audit-log record, and set/get-parameter round-trip.
+# steps:
+# - 1. Ensure usbguard.service is active.
+# - 2. Check default InsertedDevicePolicy=apply-policy and ImplicitPolicyTarget=block.
+# - 3. block-device/allow-device a found USB device; verify list-devices flips and audit log records it.
+# - 4. get/set-parameter round-trip.
+# author: <qe-security@suse.de>
+# maintainer: QE Security <none@suse.de>
+# expected: no errors raised
+# platform: SLE15,SLE16,TW,Leap
+# tags: security usbguard usb-access-control
+# ---
+# METADATA_END
+
+set -e
+
+source ../lib/helper.sh
+
+TEST_FILES=(test_usbguard.py)
+
+handle_args "$0" "$@"
+
+# Run tests with pytest and generate junitxml results.
+# Disable `set -e` around pytest so a non-zero pytest exit code does not abort
+# this script before results.xml is produced. The outer agnosticTestRunner chains
+# `./runtest && mv results.xml ...`, so we exit 0 here whenever results.xml was
+# generated; pytest failures are surfaced by parse_results() from the XML.
+set +e
+pytest test_usbguard.py --junitxml=results.xml
+rc=$?
+set -e
+if [ -f results.xml ]; then
+    exit 0
+fi
+exit $rc
